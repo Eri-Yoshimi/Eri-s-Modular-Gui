@@ -226,19 +226,43 @@ function erismodulargui:Initialize(modularInfo)
 	minimizeMenuButton.Font = modularInfo.font
 	minimizeMenuButton.Text = "-"
 	
+	local maximizeButton = Instance.new("TextButton", newGUI)
+	maximizeButton.Size = UDim2.new(0, minimizeMenuButton.AbsoluteSize.X, 0, minimizeMenuButton.AbsoluteSize.Y)
+	maximizeButton.TextColor3 = modularInfo.textColor
+	maximizeButton.AnchorPoint = Vector2.new(1, 1)
+	maximizeButton.Position =  UDim2.new(1, 0, 1, 0)
+	maximizeButton.BorderSizePixel = 0
+	maximizeButton.BackgroundColor3 = modularInfo.backgroundColor
+	maximizeButton.TextScaled = true
+	maximizeButton.Font = modularInfo.font
+	maximizeButton.Text = "+"
+	maximizeButton.Visible = false
+	
 	if modularInfo.draggable == true then
-		local minimized = false
-		minimizeMenuButton.Activated:Connect(function()
-			minimized = not minimized
-			pageSelector.Visible = not minimized
-			mainContentFrame.Visible = not minimized
-			minimizeMenuButton.Text = minimized and "+" or "-"
-			newMainFrame.Size = minimized and UDim2.new(0, modularInfo.size.X.Offset, 0, modularInfo.barY) or modularInfo.size
+		if modularInfo.centered == true then
+			local minimized = false
+			minimizeMenuButton.Activated:Connect(function()
+				minimized = not minimized
+				pageSelector.Visible = not minimized
+				mainContentFrame.Visible = not minimized
+				minimizeMenuButton.Text = minimized and "+" or "-"
+				newMainFrame.Size = minimized and UDim2.new(0, modularInfo.size.X.Offset, 0, modularInfo.barY) or modularInfo.size
+				newMainFrame.AnchorPoint = Vector2.new(0.5, 0)
+			end)
+
 			newMainFrame.AnchorPoint = Vector2.new(0.5, 0)
-		end)
-		
-		newMainFrame.AnchorPoint = Vector2.new(0.5, 0)
-		newMainFrame.Position = UDim2.new(0.5, 0, 0.5, -modularInfo.size.Y.Offset / 2)
+			newMainFrame.Position = UDim2.new(0.5, 0, 0.5, -modularInfo.size.Y.Offset / 2)
+		else
+			minimizeMenuButton.Activated:Connect(function()
+				newMainFrame.Visible = false
+				maximizeButton.Visible = true
+			end)
+
+			maximizeButton.Activated:Connect(function()
+				newMainFrame.Visible = true
+				maximizeButton.Visible = false
+			end)
+		end
 		
 		local button = titleLabel
 		local frame = newMainFrame
@@ -281,19 +305,6 @@ function erismodulargui:Initialize(modularInfo)
 			end
 		end)
 	else
-		local maximizeButton = Instance.new("TextButton", newGUI)
-
-		maximizeButton.Size = UDim2.new(0, minimizeMenuButton.AbsoluteSize.X, 0, minimizeMenuButton.AbsoluteSize.Y)
-		maximizeButton.TextColor3 = modularInfo.textColor
-		maximizeButton.AnchorPoint = Vector2.new(1, 1)
-		maximizeButton.Position =  UDim2.new(1, 0, 1, 0)
-		maximizeButton.BorderSizePixel = 0
-		maximizeButton.BackgroundColor3 = modularInfo.backgroundColor
-		maximizeButton.TextScaled = true
-		maximizeButton.Font = modularInfo.font
-		maximizeButton.Text = "+"
-		maximizeButton.Visible = false
-
 		minimizeMenuButton.Activated:Connect(function()
 			newMainFrame.Visible = false
 			maximizeButton.Visible = true
