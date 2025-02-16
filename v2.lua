@@ -83,7 +83,12 @@ function erismodulargui:Initialize(modularInfo)
 		size = modularInfo.size or UDim2.new(0.4, 0, 0.9, 0),
 		draggable = modularInfo.draggable or false,
 		centered = modularInfo.centered == nil and true or modularInfo.centered,
+		freemouse = modularInfo.freemouse or false,
+		toggleBind = modularInfo.toggleBind or nil,
+		startMinimized = modularInfo.startMinimized or false,
 	}
+
+	local minimized = not modularInfo.startMinimized
 	
 	local function centerUIelement(uiElement: GuiObject)
 		uiElement.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -120,6 +125,14 @@ function erismodulargui:Initialize(modularInfo)
 		
 		return newButton
 	end
+	
+	local freeMouseButton = Instance.new("TextButton", newGUI)
+	freeMouseButton.Size = UDim2.new(1, 0, 1, 0)
+	freeMouseButton.BackgroundTransparency = 1
+	freeMouseButton.Text = ""
+	freeMouseButton.Interactable = false
+	freeMouseButton.Modal = modularInfo.freemouse
+	freeMouseButton.Visible = not minimized
 
 	local newMainFrame = Instance.new("Frame", newGUI)
 	newMainFrame.Size = modularInfo.size
@@ -238,30 +251,33 @@ function erismodulargui:Initialize(modularInfo)
 	maximizeButton.Text = "+"
 	maximizeButton.Visible = false
 	
-	if modularInfo.draggable == true then
-		if modularInfo.centered == true then
-			local minimized = false
-			minimizeMenuButton.Activated:Connect(function()
-				minimized = not minimized
+	local function handleMinimize()
+		minimized = not minimized
+		
+		if modularInfo.draggable == true  then
+			if modularInfo.centered == true then
 				pageSelector.Visible = not minimized
 				mainContentFrame.Visible = not minimized
+				freeMouseButton.Visible = not minimized
 				minimizeMenuButton.Text = minimized and "+" or "-"
 				newMainFrame.Size = minimized and UDim2.new(0, modularInfo.size.X.Offset, 0, modularInfo.barY) or modularInfo.size
 				newMainFrame.AnchorPoint = Vector2.new(0.5, 0)
-			end)
-
+			else
+				newMainFrame.Visible = not minimized
+				maximizeButton.Visible = minimized
+				freeMouseButton.Visible = not minimized
+			end
+		else
+			newMainFrame.Visible = not minimized
+			maximizeButton.Visible = minimized
+			freeMouseButton.Visible = not minimized
+		end
+	end
+	
+	if modularInfo.draggable == true then
+		if modularInfo.centered == true then
 			newMainFrame.AnchorPoint = Vector2.new(0.5, 0)
 			newMainFrame.Position = UDim2.new(0.5, 0, 0.5, -modularInfo.size.Y.Offset / 2)
-		else
-			minimizeMenuButton.Activated:Connect(function()
-				newMainFrame.Visible = false
-				maximizeButton.Visible = true
-			end)
-
-			maximizeButton.Activated:Connect(function()
-				newMainFrame.Visible = true
-				maximizeButton.Visible = false
-			end)
 		end
 		
 		local button = titleLabel
@@ -304,17 +320,25 @@ function erismodulargui:Initialize(modularInfo)
 				dragging = false
 			end
 		end)
-	else
-		minimizeMenuButton.Activated:Connect(function()
-			newMainFrame.Visible = false
-			maximizeButton.Visible = true
-		end)
+	end
 
-		maximizeButton.Activated:Connect(function()
-			newMainFrame.Visible = true
-			maximizeButton.Visible = false
+	minimizeMenuButton.Activated:Connect(function()
+		handleMinimize()
+	end)
+
+	maximizeButton.Activated:Connect(function()
+		handleMinimize()
+	end)
+	
+	if modularInfo.toggleBind then
+		game:GetService("UserInputService").InputBegan:Connect(function(key)
+			if key.KeyCode == modularInfo.toggleBind then
+				handleMinimize()
+			end
 		end)
 	end
+	
+	handleMinimize()
 
 	local createdModules = {}
 	local currentPage = 1
