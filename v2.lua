@@ -7,7 +7,7 @@ function randomString()
 	return table.concat(array)
 end
 
--- Custom Event Code ------------------------------------------
+-- Custom Event Code -------------------------------------------
 local Signal = {}
 Signal.__index = Signal
 
