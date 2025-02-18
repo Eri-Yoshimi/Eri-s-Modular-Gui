@@ -643,11 +643,4 @@ function erismodulargui:Initialize(modularInfo)
 	return self
 end
 
-local function countLines(scriptSource)
-	return #string.split(scriptSource, "\n")
-end
-
-local scriptLines = countLines(script.Source)
-print("Version:", scriptLines)
-
 return erismodulargui
