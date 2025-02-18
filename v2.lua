@@ -515,6 +515,123 @@ function erismodulargui:Initialize(modularInfo)
 
 			return listObject
 		end
+		
+		function module:AddSlider(sliderText, min, max)
+			-- Slider Frame
+			local sliderFrame = Instance.new("Frame", contentBox)
+			sliderFrame.Size = UDim2.new(1, 0, 0, 0)
+			sliderFrame.BackgroundColor3 = modularInfo.secondaryColor
+			sliderFrame.AutomaticSize = Enum.AutomaticSize.Y
+			sliderFrame.BorderSizePixel = 0
+
+			-- Slider Label
+			local sliderLabel = Instance.new("TextLabel", sliderFrame)
+			sliderLabel.Size = UDim2.new(1, 0, 0, modularInfo.barY)
+			sliderLabel.Text = sliderText..": 0.00"  -- Default label text with 0.00
+			sliderLabel.TextScaled = true
+			sliderLabel.Font = modularInfo.font
+			sliderLabel.TextColor3 = modularInfo.textColor
+			sliderLabel.BackgroundColor3 = modularInfo.secondaryColor
+			sliderLabel.BorderSizePixel = 0
+
+			-- Slider Holder (Background)
+			local sliderHolder = Instance.new("Frame", sliderFrame)
+			sliderHolder.Size = UDim2.new(1, 0, 0, modularInfo.barY)
+			sliderHolder.Position = UDim2.new(0, 0, 1, 0)
+			sliderHolder.BackgroundColor3 = modularInfo.secondaryColor
+			sliderHolder.BorderSizePixel = 0
+
+			-- Slider Bar (The part that shows progress)
+			local sliderBar = Instance.new("Frame", sliderHolder)
+			sliderBar.Size = UDim2.new(0.9, 0, 0.6, 0)
+			sliderBar.Position = UDim2.new(0.5, 0, 0.5, 0)
+			sliderBar.AnchorPoint = Vector2.new(0.5, 0.5)
+			sliderBar.BackgroundColor3 = modularInfo.textColor
+			sliderBar.BorderSizePixel = 0
+
+			-- Slider Button (the draggable part)
+			local sliderButton = Instance.new("TextButton", sliderBar)
+			sliderButton.Size = UDim2.new(0, 20, 1, 0)  -- Initial size of the slider button
+			sliderButton.Position = UDim2.new(0, 0, 0, 0)
+			sliderButton.BackgroundColor3 = modularInfo.primaryColor
+			sliderButton.TextColor3 = modularInfo.textColor
+			sliderButton.BorderSizePixel = 0
+			sliderButton.Text = ""
+			local sliderButtonAspectRatio = Instance.new("UIAspectRatioConstraint", sliderButton)
+
+			-- Variables to track dragging
+			local dragging = false
+			local dragStart = nil
+			local startPos = nil
+			local userInputService = game:GetService("UserInputService")
+			local runService = game:GetService("RunService")
+
+			-- Signal for slider value changes
+			local valueChanged = Signal.new()
+
+			-- Mouse Input for dragging the slider button
+			sliderButton.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = true
+					dragStart = userInputService:GetMouseLocation()
+					startPos = sliderButton.Position
+				end
+			end)
+
+			-- Smooth dragging with RenderStepped
+			local connection
+			connection = runService.RenderStepped:Connect(function(dt)
+				if dragging then
+					local mousePos = userInputService:GetMouseLocation()
+					local delta = UDim2.new(0, mousePos.X - dragStart.X, 0, 0)
+
+					-- Calculate the new position of the slider button
+					local newPos = UDim2.new(
+						startPos.X.Scale, startPos.X.Offset + delta.X.Offset,
+						startPos.Y.Scale, startPos.Y.Offset
+					)
+
+					-- Ensure the slider button stays within the bounds of the slider bar
+					local minPos = 0
+					local maxPos = sliderBar.AbsoluteSize.X - sliderButton.AbsoluteSize.X
+					newPos = UDim2.new(0, math.clamp(newPos.X.Offset, minPos, maxPos), 0, newPos.Y.Offset)
+
+					-- Smoothly move the slider button using Lerp
+					sliderButton.Position = newPos
+
+					-- Calculate the slider value based on the position
+					local sliderValue = min + (sliderButton.Position.X.Offset / maxPos) * (max - min)
+					local formattedValue = string.format("%.2f", sliderValue)
+					sliderLabel.Text = sliderText..": "..formattedValue
+
+					-- Fire the valueChanged signal with the new value
+					valueChanged:Fire(sliderValue)
+				end
+			end)
+
+			-- Stop dragging when the mouse button is released
+			userInputService.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					dragging = false
+				end
+			end)
+
+			local sliderObject = {
+				Frame = sliderFrame,
+				GetValue = function()
+					return min + (sliderButton.Position.X.Offset / (sliderBar.AbsoluteSize.X - sliderButton.AbsoluteSize.X)) * (max - min)
+				end,
+				SetValue = function(value)
+					value = math.clamp(value, min, max)
+					local normalizedValue = (value - min) / (max - min)
+					sliderButton.Position = UDim2.new(normalizedValue, 0, 0, 0)
+					sliderLabel.Text = sliderText..": "..string.format("%.2f", value)
+				end,
+				OnValueChanged = valueChanged
+			}
+
+			return sliderObject
+		end
 
 		table.insert(createdModules, module)
 		updateModuleVisibility()
