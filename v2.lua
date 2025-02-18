@@ -485,17 +485,18 @@ function erismodulargui:Initialize(modularInfo)
 				OnItemChanged = Signal.new()
 			}
 
-			function listObject:AddListItem(itemText)
+			function listObject:AddListItem(itemText, relatedValue)
+				relatedValue = relatedValue or itemText
 				local itemButton = addButton(itemListFrame, itemText)
 
 				itemButton.Activated:Connect(function()
-					listObject.currentItem = itemText
+					listObject.currentItem = relatedValue
 					titleButton.Text = listTitle .. ": " .. itemText
 					itemListFrame.Visible = false
-					listObject.OnItemChanged:Fire(itemText)
+					listObject.OnItemChanged:Fire(relatedValue)
 				end)
 
-				table.insert(listObject.Items, itemButton)
+				table.insert(listObject.Items, {Button = itemButton, Value = relatedValue})
 				return itemButton
 			end
 
