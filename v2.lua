@@ -528,7 +528,7 @@ function erismodulargui:Initialize(modularInfo)
 			-- Slider Label
 			local sliderLabel = Instance.new("TextLabel", sliderFrame)
 			sliderLabel.Size = UDim2.new(1, 0, 0, modularInfo.barY)
-			sliderLabel.Text = sliderText..": 0.00"  -- Default label text with 0.00
+			sliderLabel.Text = sliderText..": "..string.format("%.2f", min)
 			sliderLabel.TextScaled = true
 			sliderLabel.Font = modularInfo.font
 			sliderLabel.TextColor3 = modularInfo.textColor
