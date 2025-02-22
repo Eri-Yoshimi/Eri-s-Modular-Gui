@@ -424,6 +424,15 @@ function erismodulargui:Initialize(modularInfo)
 
 			return textLabel
 		end
+		
+		function module:AddDivider()
+			local divider = Instance.new("Frame", contentBox)
+			divider.Size = UDim2.new(1, 0, 0, math.sqrt(modularInfo.barY))
+			divider.BackgroundColor3 = modularInfo.textColor
+			divider.BorderSizePixel = 0
+
+			return divider
+		end
 
 		function module:AddButton(buttonText)
 			local button = addButton(contentBox, buttonText)
