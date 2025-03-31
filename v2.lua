@@ -68,6 +68,8 @@ function erismodulargui:Initialize(modularInfo)
 	end
 	newGUI.ResetOnSpawn = false
 	newGUI.IgnoreGuiInset = true
+
+	self.GUI = newGUI
 	
 	modularInfo = modularInfo or {}
 	
