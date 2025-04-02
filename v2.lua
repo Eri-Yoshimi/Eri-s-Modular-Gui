@@ -472,7 +472,7 @@ function erismodulargui:Initialize(modularInfo)
 			local itemListFrame = Instance.new("ScrollingFrame", listContainer)
 			itemListFrame.Position = UDim2.new(0, 0, 0, -5)
 			itemListFrame.AnchorPoint = Vector2.new(0, 1)
-			itemListFrame.Size = UDim2.new(1, 0, 5, 0)
+			itemListFrame.Size = UDim2.new(1, 0, 8, 0)
 			itemListFrame.BackgroundColor3 = modularInfo.backgroundColor
 			itemListFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 			itemListFrame.ScrollBarThickness = 0
